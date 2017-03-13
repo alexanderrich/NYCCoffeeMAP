@@ -9,46 +9,43 @@ var path = d3.geoPath(d3.geoConicConformal()
                       .scale(70000)
                       .rotate([74, -40 - 45 / 60]));
 
-var x = d3.scaleLinear()
-        .domain([1, 10])
-        .rangeRound([600, 860]);
+var xLogScale = d3.scaleLog()
+        // .exponent(.5)
+        .base(2)
+        .domain([2, 120])
+        .range([0, 7]);
 
 var color = d3.scaleThreshold()
-        .domain([1,2,4,8,16,32,64,128])
+        .domain(d3.range(0,8))
         .range(d3.schemeBlues[9]);
 
-// var g = svg.append("g")
-//            .attr("class", "key")
-//            .attr("transform", "translate(0,40)");
+var g = svg.append("g")
+           .attr("class", "key")
+           .attr("transform", "translate(20,40)");
 
-// g.selectAll("rect")
-//  .data(color.range().map(function(d) {
-//      d = color.invertExtent(d);
-//      if (d[0] == null) d[0] = x.domain()[0];
-//      if (d[1] == null) d[1] = x.domain()[1];
-//      return d;
-//  }))
-//  .enter().append("rect")
-//  .attr("height", 8)
-//  .attr("x", function(d) { return x(d[0]); })
-//  .attr("width", function(d) { return x(d[1]) - x(d[0]); })
-//  .attr("fill", function(d) { return color(d[0]); });
+g.selectAll("rect")
+    .data(color.range())
+    .enter().append("rect")
+    .attr("height", 8)
+    .attr("x", function(d, i) {return 20*i;})
+    .attr("width", function(d) { return 20; })
+    .attr("fill", function(d) { return d; });
 
 // g.append("text")
 //  .attr("class", "caption")
-//  .attr("x", x.range()[0])
+//  .attr("x", xScale.range()[0])
 //  .attr("y", -6)
 //  .attr("fill", "#000")
 //  .attr("text-anchor", "start")
 //  .attr("font-weight", "bold")
 //  .text("Unemployment rate");
 
-// g.call(d3.axisBottom(x)
-//          .tickSize(13)
-//          .tickFormat(function(x, i) { return i ? x : x + "%"; })
-//          .tickValues(color.domain()))
-//  .select(".domain")
-//  .remove();
+g.call(d3.axisBottom(d3.scaleLinear().domain([0, 140]).range([20, 160]))
+       .tickSize(13)
+       .tickFormat(function(x, i) {return Math.ceil(xLogScale.invert(i)).toFixed();})
+       .tickValues([0,20,40,60,80,100,120,140]))
+    .select(".domain")
+    .remove();
 
 d3.queue()
     .defer(d3.json, "data/nyc-zip-code.json")
@@ -66,7 +63,7 @@ function ready(error, map) {
         .selectAll("path")
         .data(map.features)
         .enter().append("path")
-        .attr("fill", function(d) { return color(d.stats.total / d.stats.area); })
+        .attr("fill", function(d) { return color(xLogScale(Math.floor(d.stats.total / d.stats.area))); })
         .attr("d", path)
         .append("title")
         .text(function(d) { return d.stats.total / d.stats.area; });
