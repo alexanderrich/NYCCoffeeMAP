@@ -65,12 +65,13 @@ function ready(error, map) {
         feat.stats = coffeeStats.get(feat.properties.ZIP) || {};
     });
     svg.append("g")
+        .attr("id", "zoomgroup")
+        .append("g")
         .attr("transform", "translate(-150) scale(1.1)")
         .attr("class", "zips")
         .selectAll("path")
         .data(map.features)
         .enter().append("path")
-        // .attr("fill", function(d) { return color(xLogScale(Math.floor(d.stats.total / d.stats.area) || 0)); })
         .attr("fill", "#fff")
         .attr("d", path)
         .append("title");
@@ -89,6 +90,14 @@ function ready(error, map) {
         fixed = this.checked;
         updateFill();
     });
+
+    svg.call(d3.zoom()
+             .scaleExtent([1/2, 10])
+             .on("zoom", zoomed));
+
+    function zoomed() {
+        svg.select("#zoomgroup").attr("transform", d3.event.transform);
+    }
 
     updateFill();
 
