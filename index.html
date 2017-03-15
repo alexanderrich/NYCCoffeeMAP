@@ -1,28 +1,36 @@
 <!DOCTYPE html>
 <html>
     <meta charset="utf-8">
-    <style>
-
-     .counties {
-         fill: none;
-     }
-
-     .states {
-         fill: none;
-         stroke: #fff;
-         stroke-linejoin: round;
-     }
-     body {
-         background-color: #444444;
-     }
-
-    </style>
+    <link rel="stylesheet" type="text/css" href="styles.css">
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
     <script src="https://d3js.org/topojson.v2.min.js"></script>
 
     <body>
-        <svg width="960" height="700"></svg>
+        <div id="settings">
+            <form id="storetypeform">
+                <div class="radio">
+                    <label><input type="radio" class="storetype" name="storetype" value="total" checked="checked">Total</label>
+                </div>
+                <div class="radio">
+                    <label><input type="radio" class="storetype" name="storetype" value="dunkin">Dunkin' Donuts</label>
+                </div>
+                <div class="radio">
+                    <label><input type="radio" class="storetype" name="storetype" value="starbucks">Starbucks</label>
+                </div>
+                <div class="radio">
+                    <label><input type="radio" class="storetype" name="storetype" value="other">Other</label>
+                </div>
+                <div>
+                    <label><input id="proportion" type="checkbox">Proportion</label>
+                </div>
+                <div>
+                    <label><input id="fixscale" type="checkbox" checked>Fix scale</label>
+                </div>
+            </form>
+            <svg id="scale" width="300" height="100"></svg>
+        </div>
+        <svg id="map" viewBox="0 -10 1000 1000"></svg>
     </body>
     <script src="script.js"></script>
 </html>

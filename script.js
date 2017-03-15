@@ -1,6 +1,6 @@
-var svg = d3.select("svg"),
-    width = svg.attr("width"),
-    height = svg.attr("height");
+var svg = d3.select("#map");
+
+
 
 var coffeeStats = d3.map();
 
@@ -10,20 +10,23 @@ var path = d3.geoPath(d3.geoConicConformal()
                       .rotate([74, -40 - 45 / 60]));
 
 var xLogScale = d3.scaleLog()
-        // .exponent(.5)
         .base(2)
-        .domain([2, 120])
+        .domain([2, 100])
+        .range([0, 7]);
+
+var xPropScale = d3.scaleLinear()
+        .domain([.1, .8])
         .range([0, 7]);
 
 var color = d3.scaleThreshold()
         .domain(d3.range(0,8))
         .range(d3.schemeBlues[9]);
 
-var g = svg.append("g")
+var axis = d3.select("#scale").append("g")
            .attr("class", "key")
            .attr("transform", "translate(20,40)");
 
-g.selectAll("rect")
+axis.selectAll("rect")
     .data(color.range())
     .enter().append("rect")
     .attr("height", 8)
@@ -40,7 +43,7 @@ g.selectAll("rect")
 //  .attr("font-weight", "bold")
 //  .text("Unemployment rate");
 
-g.call(d3.axisBottom(d3.scaleLinear().domain([0, 140]).range([20, 160]))
+axis.call(d3.axisBottom(d3.scaleLinear().domain([0, 140]).range([20, 160]))
        .tickSize(13)
        .tickFormat(function(x, i) {return Math.ceil(xLogScale.invert(i)).toFixed();})
        .tickValues([0,20,40,60,80,100,120,140]))
@@ -53,18 +56,93 @@ d3.queue()
     .await(ready);
 
 function ready(error, map) {
+    var storeType = d3.select('input[name="storetype"]:checked').attr("value"),
+        proportion = d3.select('#proportion').property("checked"),
+        fixed = d3.select("#fixscale").property("checked");
+
     if (error) throw error;
     map.features.forEach(function(feat) {
         feat.stats = coffeeStats.get(feat.properties.ZIP) || {};
     });
-    console.log(map);
     svg.append("g")
-        .attr("class", "counties")
+        .attr("transform", "translate(-150) scale(1.1)")
+        .attr("class", "zips")
         .selectAll("path")
         .data(map.features)
         .enter().append("path")
-        .attr("fill", function(d) { return color(xLogScale(Math.floor(d.stats.total / d.stats.area))); })
+        // .attr("fill", function(d) { return color(xLogScale(Math.floor(d.stats.total / d.stats.area) || 0)); })
+        .attr("fill", "#fff")
         .attr("d", path)
-        .append("title")
-        .text(function(d) { return d.stats.total / d.stats.area; });
+        .append("title");
+
+    d3.selectAll(".storetype").on("change", function () {
+        storeType = this.value;
+        updateFill();
+    });
+
+    d3.select("#proportion").on("change", function () {
+        proportion = this.checked;
+        updateFill();
+    });
+
+    d3.select("#fixscale").on("change", function () {
+        fixed = this.checked;
+        updateFill();
+    });
+
+    updateFill();
+
+    function updateFill() {
+        if (proportion) {
+            if (fixed) {
+                xPropScale.domain([.1, .8]);
+            } else {
+                if (storeType == "starbucks") {
+                    xPropScale.domain([.05, .4]);
+                } else if (storeType == "dunkin") {
+                    xPropScale.domain([.1, .8]);
+                } else if (storeType == "other") {
+                    xPropScale.domain([.1, .8]);
+                } else if (storeType == "total") {
+                    xPropScale.domain([.1, .8]);
+                }
+            }
+            axis.selectAll(".tick")
+                .select("text")
+                .text(function(x, i) {return xPropScale.invert(i).toFixed(2).substr(1);});
+            svg.selectAll("path")
+                .transition()
+                .duration(500)
+                .attr("fill", function(d) { return color(xPropScale(d.stats[storeType + "_prop"] || 0)); });
+            svg.select(".zips").selectAll("path")
+                .select("title")
+                .text(function(d) { return d.stats[storeType + "_prop"] || 0; });
+        } else {
+            if (fixed) {
+                xLogScale.domain([2, 100]);
+            } else {
+                if (storeType == "starbucks") {
+                    xLogScale.domain([2, 40]);
+                } else if (storeType == "dunkin") {
+                    xLogScale.domain([2, 20]);
+                } else if (storeType == "other") {
+                    xLogScale.domain([2, 60]);
+                } else if (storeType == "total") {
+                    xLogScale.domain([2, 100]);
+                }
+            }
+            axis.selectAll(".tick")
+                .select("text")
+                .text(function(x, i) {return Math.ceil(xLogScale.invert(i)).toFixed();});
+            svg.selectAll("path")
+                .transition()
+                .duration(500)
+                .attr("fill", function(d) { return color(xLogScale(Math.floor(d.stats[storeType] / d.stats.area) || 0)); });
+            svg.select(".zips").selectAll("path")
+                .select("title")
+                .text(function(d) { return d.stats[storeType] / d.stats.area || 0; });
+        }
+
+    }
 }
+

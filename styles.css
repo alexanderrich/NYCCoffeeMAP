@@ -1,0 +1,39 @@
+body {
+    background-color: #444444;
+    font-family: sans-serif;
+    margin:0;
+    padding:0;
+    overflow:hidden;
+}
+
+/* html, body { margin:0; padding:0; overflow:hidden } */
+#map {
+    /* position: absolute; */
+    position: fixed;
+    top: 0px;
+    left: 250px;
+    bottom: 0px;
+    right: 0px;
+ }
+
+
+#settings {
+    position: fixed;
+    /* left: 25px; */
+    /* top: 25px; */
+    left: 0px;
+    top: 0px;
+    width: 250px;
+    height: 100%;
+    background-color: #fff;
+}
+
+#storetypeform {
+    margin: 10px;
+}
+
+.zips {
+    fill: #fff;
+    /* stroke: #fff; */
+    /* stroke-linejoin: round; */
+}
