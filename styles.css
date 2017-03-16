@@ -37,3 +37,15 @@ body {
     /* stroke: #fff; */
     /* stroke-linejoin: round; */
 }
+
+div.mouseover{
+	position: absolute;
+	background: black;
+	background-color: rgba(0,0,0,0.5);
+	border: 1px solid #131313;
+	color: white;
+	padding: 5px 8px;
+	margin-left: 100px;
+	margin-top: 50px;
+	display: none;
+}

@@ -1,7 +1,5 @@
 var svg = d3.select("#map");
 
-
-
 var coffeeStats = d3.map();
 
 var path = d3.geoPath(d3.geoConicConformal()
@@ -74,7 +72,8 @@ function ready(error, map) {
         .enter().append("path")
         .attr("fill", "#fff")
         .attr("d", path)
-        .append("title");
+  	    .on("mouseover",mouseover)
+	      .on("mouseout",mouseout);
 
     d3.selectAll(".storetype").on("change", function () {
         storeType = this.value;
@@ -99,7 +98,35 @@ function ready(error, map) {
         svg.select("#zoomgroup").attr("transform", d3.event.transform);
     }
 
-    updateFill();
+
+    function mouseover(d){
+	      var text="NY"+d.properties["ZIP"];
+	      // you can add any more information to the mouseover
+	      // here, using data in your JSON
+	      d3.select(".mouseover").text(text);
+	      d3.select(".mouseover").style("display","inline");
+    }
+
+    function mouseout(){
+        d3.select("#arcSelection").remove();
+
+	      d3.select(".mouseover").text("");
+	      d3.select(".mouseover").style("display","none");
+    }
+
+    // moves the mouseover box whenever the mouse is moved.
+    d3.select('html') // Selects the 'html' element
+        .on('mousemove', function()
+            {
+		        var locs=d3.mouse(this);	// get the mouse coordinates
+
+		        // add some padding
+		        locs[0]+=15;
+		        locs[1]+=5;
+
+		        d3.select("div.mouseover").style("margin-left", locs[0] + "px");
+		        d3.select("div.mouseover").style("margin-top", locs[1] + "px");
+        });
 
     function updateFill() {
         if (proportion) {
@@ -153,5 +180,6 @@ function ready(error, map) {
         }
 
     }
+    updateFill();
 }
 
