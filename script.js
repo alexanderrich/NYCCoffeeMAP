@@ -22,15 +22,15 @@ var color = d3.scaleThreshold()
         .domain(d3.range(0,8))
         .range(d3.schemeBlues[9]);
 
-var pieColor = d3.scaleOrdinal(["#98abc5", "#8a89a6", "#7b6888"]);
+var pieColor = d3.scaleOrdinal(["#00592D", "#D81860", "#BBBBBB"]);
 
 var pie = d3.pie()
         .sort(null)
         .value(function(d) { return d.number; });
 
-var pieLabel = d3.arc()
-        .outerRadius(60)
-        .innerRadius(60);
+// var pieLabel = d3.arc()
+//         .outerRadius(60)
+//         .innerRadius(60);
 
 var axis = d3.select("#scale").append("g")
            .attr("class", "key")
@@ -132,15 +132,30 @@ function ready(error, map) {
               .outerRadius(10)
               .innerRadius(0))
         .each(function (d) {this._current = d; })
-        .attr("fill", function (d) {return pieColor(d.data.name)});
+        .attr("fill", function (d) {return pieColor(d.data.name); });
+
+    arc.append("text")
+        .each(function (d) {this._current = d; })
+        .attr("transform", function (d) {return "translate(" +
+                                         d3.arc().outerRadius(60).innerRadius(60).centroid(d) + ")"; })
+        .text(function (d) {return d.data.name; })
+        .attr("text-anchor", "middle");
 
     function arcTween(d) {
         var i = d3.interpolate(this._current, d),
-            //FIGURE OUT INTERPOLATION FOR ARC SIZE
             j = d3.interpolate(Math.sqrt(this._current.data.total)*10, Math.sqrt(d.data.total )* 10);
         this._current = i(0);
         return function(t) {
             return d3.arc().outerRadius(j(t)).innerRadius(0)(i(t));
+        };
+    }
+
+    function textTween(d) {
+        var i = d3.interpolate(this._current, d),
+            j = d3.interpolate(Math.sqrt(this._current.data.total)*10, Math.sqrt(d.data.total )* 10);
+        this._current = i(0);
+        return function(t) {
+            return "translate(" + d3.arc().outerRadius(20 + j(t)).innerRadius(20 + j(t)).centroid(i(t)) + ")";
         };
     }
 
@@ -150,12 +165,18 @@ function ready(error, map) {
                         {'name': 'Dunkin\' Donuts', 'number': d.stats['dunkin'], 'total': d.stats.total},
                         {'name': 'Other', 'number': d.stats['other'], 'total': d.stats.total}];
 
-        mouseOverGraph.selectAll(".arc")
-                .select("path")
-                .data(pie(pieStats))
-            .transition()
-            .duration(500)
+        var t = d3.transition()
+                .duration(500);
+
+        arc.data(pie(pieStats))
+            .select("path")
+            .transition(t)
             .attrTween("d", arcTween);
+
+        arc.select("text")
+            .transition(t)
+            .attrTween("transform", textTween);
+
 	      d3.select(".mouseover").style("display","inline");
     }
 
