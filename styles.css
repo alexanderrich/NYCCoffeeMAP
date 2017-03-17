@@ -41,7 +41,7 @@ body {
 div.mouseover{
 	position: absolute;
 	background: black;
-	background-color: rgba(0,0,0,0.5);
+	background-color: rgba(0,0,0,0.7);
 	border: 1px solid #131313;
 	color: white;
 	padding: 5px 8px;

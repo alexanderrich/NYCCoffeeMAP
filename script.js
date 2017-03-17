@@ -1,6 +1,7 @@
 var mapSvg = d3.select("#map"),
-    mouseOverGraph = d3.select("#mouseovergraph").append("g")
-        .attr("transform", "translate(100, 100)");
+    mouseOverGraph = d3.select("#mouseovergraph").style("fill", "white"),
+    circleGroup = mouseOverGraph.append("g")
+        .attr("transform", "translate(150, 100)");
 
 var coffeeStats = d3.map();
 
@@ -120,7 +121,7 @@ function ready(error, map) {
         mapSvg.select("#zoomgroup").attr("transform", d3.event.transform);
     }
 
-    var arc = mouseOverGraph.selectAll(".arc")
+    var arc = circleGroup.selectAll(".arc")
             .data(pie([{'name': 'Starbucks', 'number': 1, 'total': 3},
                        {'name': 'Dunkin\' Donuts', 'number': 1, 'total': 3},
                        {'name': 'Other', 'number': 1, 'total': 3}]))
@@ -134,12 +135,50 @@ function ready(error, map) {
         .each(function (d) {this._current = d; })
         .attr("fill", function (d) {return pieColor(d.data.name); });
 
-    arc.append("text")
-        .each(function (d) {this._current = d; })
-        .attr("transform", function (d) {return "translate(" +
-                                         d3.arc().outerRadius(60).innerRadius(60).centroid(d) + ")"; })
-        .text(function (d) {return d.data.name; })
-        .attr("text-anchor", "middle");
+    var textGroup = mouseOverGraph.append("g")
+        .attr("transform", "translate(4, 20)");
+    textGroup.append("text")
+        .attr("id", "zip")
+        .style("font-size", "24px")
+        .text("");
+    textGroup.append("text")
+        .attr("id", "total_number")
+        .attr("y", 20)
+        .text("xx stores");
+    textGroup.append("text")
+        .attr("id", "total_density")
+        .attr("y", 40)
+        .text("xx/mi²");
+
+    var textGroupInfo = [{'name': 'starbucks', 'text': 'Starbucks', 'offset': 20},
+                         {'name': 'dunkin', 'text': 'Dunkin\' Donuts', 'offset': 90},
+                         {'name': 'other', 'text': 'Other', 'offset': 160}];
+    for (var i = 0; i<3; i++) {
+        textGroup = mouseOverGraph.append("g")
+                .attr("transform", "translate(270," + textGroupInfo[i]['offset'] + ")");
+        textGroup.append("rect")
+            .attr("x", -25)
+            .attr("y", -14)
+            .attr("width", 15)
+            .attr("height", 15)
+            .attr("fill", pieColor(i));
+        textGroup.append("text")
+            .style("font-size", "18px")
+            .text(textGroupInfo[i]['text']);
+        textGroup.append("text")
+            .attr("id", textGroupInfo[i]['name'] + "_number")
+            .attr("y", 20)
+            .text("xx stores");
+        textGroup.append("text")
+            .attr("id", textGroupInfo[i]['name'] + "_density")
+            .attr("y", 40)
+            .text("xx/mi²");
+        textGroup.append("text")
+            .attr("id", textGroupInfo[i]['name'] + "_prop")
+            .attr("y", 40)
+            .attr("x", 75)
+            .text("100%");
+    }
 
     function arcTween(d) {
         var i = d3.interpolate(this._current, d),
@@ -147,15 +186,6 @@ function ready(error, map) {
         this._current = i(0);
         return function(t) {
             return d3.arc().outerRadius(j(t)).innerRadius(0)(i(t));
-        };
-    }
-
-    function textTween(d) {
-        var i = d3.interpolate(this._current, d),
-            j = d3.interpolate(Math.sqrt(this._current.data.total)*10, Math.sqrt(d.data.total )* 10);
-        this._current = i(0);
-        return function(t) {
-            return "translate(" + d3.arc().outerRadius(20 + j(t)).innerRadius(20 + j(t)).centroid(i(t)) + ")";
         };
     }
 
@@ -173,9 +203,20 @@ function ready(error, map) {
             .transition(t)
             .attrTween("d", arcTween);
 
-        arc.select("text")
-            .transition(t)
-            .attrTween("transform", textTween);
+        d3.select("#zip").text(d.stats['zip']);
+        var groups = ["total", "starbucks", "dunkin", "other"];
+        for (var i=0; i<4; i++) {
+            var number = +d.stats[groups[i]];
+            d3.select("#" + groups[i] + "_number")
+                .text(number.toFixed() + " store" + (number === 1 ? "" : "s"));
+            var density = number / d.stats['area'];
+            d3.select("#" + groups[i] + "_density")
+                .text((density > 10 ? density.toFixed() : density.toFixed(1)) + "/mi²");
+            if (groups[i] !== "total") {
+                d3.select("#" + groups[i] + "_prop")
+                    .text((100 * d.stats[groups[i] + "_prop"]).toFixed() + "%");
+            }
+        }
 
 	      d3.select(".mouseover").style("display","inline");
     }
