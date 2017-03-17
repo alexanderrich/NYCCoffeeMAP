@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
     <meta charset="utf-8">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.0-beta.2/leaflet.css">
     <link rel="stylesheet" type="text/css" href="styles.css">
     <script src="https://d3js.org/d3.v4.min.js"></script>
@@ -8,27 +9,50 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.5/leaflet.js"></script>
     <body>
         <div id="settings">
-            <form id="storetypeform">
+            <h1>Coffee shop type</h1>
+            <div class="settingsgroup">
                 <div class="radio">
-                    <label><input type="radio" class="storetype" name="storetype" value="total" checked="checked">Total</label>
-                </div>
-                <div class="radio">
-                    <label><input type="radio" class="storetype" name="storetype" value="dunkin">Dunkin' Donuts</label>
+                    <label><input type="radio" class="storetype" name="storetype" value="total" checked="checked">All</label>
                 </div>
                 <div class="radio">
                     <label><input type="radio" class="storetype" name="storetype" value="starbucks">Starbucks</label>
                 </div>
                 <div class="radio">
+                    <label><input type="radio" class="storetype" name="storetype" value="dunkin">Dunkin' Donuts</label>
+                </div>
+                <div class="radio">
                     <label><input type="radio" class="storetype" name="storetype" value="other">Other</label>
                 </div>
-                <div>
-                    <label><input id="proportion" type="checkbox">Proportion</label>
-                </div>
-                <div>
-                    <label><input id="fixscale" type="checkbox" checked>Fix scale</label>
-                </div>
-            </form>
-            <svg id="scale" width="300" height="100"></svg>
+                <p class="info">Map all coffee shops by zip code, or map "Starbucks", "Dunkin' Donuts", or "other" coffee shops.</p>
+            </div>
+
+            <div class="settingsgroup" id="scalegroup">
+                <h1 id="scaletitle">Density</h1>
+                <svg id="scale" width="230" height="30"></svg>
+            </div>
+
+            <div class="settingsgroup">
+                <div class="switchleft">Density</div>
+                <label class="switch">
+                    <input id="proportion" type="checkbox">
+                    <div class="slider round"></div>
+                </label>
+                <div class="switchright">Proportion</div>
+                <p class="info">Choose "density" to map the number of coffee shops of the chosen type per square mile, and "proportion" to show the proportion of coffee shops that are of the chosen type.</p>
+                <!-- <label><input id="proportion" type="checkbox">Proportion</label> -->
+            </div>
+            <div class="settingsgroup">
+                <div class="switchleft">Free</div>
+                <label class="switch">
+                    <input id="fixscale" type="checkbox" checked>
+                    <div class="slider round"></div>
+                </label>
+                <div class="switchright">Fixed</div>
+                <!-- <label><input id="fixscale" type="checkbox" checked>Fix scale</label> -->
+                <p class="info">Choose "fixed" to keep the color scale constant when switching between shop type, and "free" to allow the scale to adjust for each shop type.</p>
+            </div>
+
+                <p class="info">Hover over a zip code to see a pie chart of coffee shops in that area. The size of the pie scales with the number of shops in zip code</p>
         </div>
         <p id="map"></p>
         <div class="mouseover">

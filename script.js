@@ -1,6 +1,6 @@
 var map = new L.Map("map", {center: [40.7128, -74.0059], zoom: 11})
         .addLayer(new L.TileLayer("https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png",
-                                  {maxZoom: 18, attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attribution">CARTO</a>'}));
+                                  {maxZoom: 16, minZoom: 10, attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attribution">CARTO</a>'}));
 
 var mapSvg = d3.select(map.getPanes().overlayPane).append("svg"),
     mapG = mapSvg.append("g").attr("class", "leaflet-zoom-hide"),
@@ -30,7 +30,7 @@ var pie = d3.pie()
 
 var axis = d3.select("#scale").append("g")
            .attr("class", "key")
-           .attr("transform", "translate(20,40)");
+           .attr("transform", "translate(20)");
 
 axis.selectAll("rect")
     .data(color.range())
@@ -129,7 +129,7 @@ function ready(error, zipJson) {
     textGroup.append("text")
         .attr("id", "total_number")
         .attr("y", 20)
-        .text("xx stores");
+        .text("xx shops");
     textGroup.append("text")
         .attr("id", "total_density")
         .attr("y", 40)
@@ -153,7 +153,7 @@ function ready(error, zipJson) {
         textGroup.append("text")
             .attr("id", textGroupInfo[i]['name'] + "_number")
             .attr("y", 20)
-            .text("xx stores");
+            .text("xx shops");
         textGroup.append("text")
             .attr("id", textGroupInfo[i]['name'] + "_density")
             .attr("y", 40)
@@ -193,7 +193,7 @@ function ready(error, zipJson) {
         for (var i=0; i<4; i++) {
             var number = +d.stats[groups[i]];
             d3.select("#" + groups[i] + "_number")
-                .text(number.toFixed() + " store" + (number === 1 ? "" : "s"));
+                .text(number.toFixed() + " shop" + (number === 1 ? "" : "s"));
             var density = number / d.stats['area'];
             d3.select("#" + groups[i] + "_density")
                 .text((density > 10 ? density.toFixed() : density.toFixed(1)) + "/mi²");
@@ -225,6 +225,7 @@ function ready(error, zipJson) {
 
     function updateFill() {
         if (proportion) {
+            d3.select("#scaletitle").text("Proportion");
             if (fixed) {
                 xPropScale.domain([.1, .8]);
             } else {
@@ -249,6 +250,7 @@ function ready(error, zipJson) {
                 .select("title")
                 .text(function(d) { return d.stats[storeType + "_prop"] || 0; });
         } else {
+            d3.select("#scaletitle").text("Density");
             if (fixed) {
                 xLogScale.domain([2, 100]);
             } else {
