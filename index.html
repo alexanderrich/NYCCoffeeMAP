@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
     <meta charset="utf-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.0-beta.2/leaflet.css">
     <link rel="stylesheet" type="text/css" href="styles.css">
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
-    <script src="https://d3js.org/topojson.v2.min.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.5/leaflet.js"></script>
     <body>
         <div id="settings">
             <form id="storetypeform">
@@ -30,7 +30,7 @@
             </form>
             <svg id="scale" width="300" height="100"></svg>
         </div>
-        <svg id="map" viewBox="0 -10 1000 1000"></svg>
+        <p id="map"></p>
         <div class="mouseover">
             <svg id="mouseovergraph" width="400" height="200"></svg>
         </div>

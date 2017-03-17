@@ -1,14 +1,13 @@
-var mapSvg = d3.select("#map"),
+var map = new L.Map("map", {center: [40.7128, -74.0059], zoom: 11})
+        .addLayer(new L.TileLayer("https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png",
+                                  {maxZoom: 18, attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attribution">CARTO</a>'}));
+
+var mapSvg = d3.select(map.getPanes().overlayPane).append("svg"),
+    mapG = mapSvg.append("g").attr("class", "leaflet-zoom-hide"),
     mouseOverGraph = d3.select("#mouseovergraph").style("fill", "white"),
-    circleGroup = mouseOverGraph.append("g")
-        .attr("transform", "translate(150, 100)");
+    circleGroup = mouseOverGraph.append("g").attr("transform", "translate(150, 100)");
 
 var coffeeStats = d3.map();
-
-var path = d3.geoPath(d3.geoConicConformal()
-                      .parallels([40 + 40 / 60, 41 + 2 / 60])
-                      .scale(70000)
-                      .rotate([74, -40 - 45 / 60]));
 
 var xLogScale = d3.scaleLog()
         .base(2)
@@ -29,10 +28,6 @@ var pie = d3.pie()
         .sort(null)
         .value(function(d) { return d.number; });
 
-// var pieLabel = d3.arc()
-//         .outerRadius(60)
-//         .innerRadius(60);
-
 var axis = d3.select("#scale").append("g")
            .attr("class", "key")
            .attr("transform", "translate(20,40)");
@@ -44,15 +39,6 @@ axis.selectAll("rect")
     .attr("x", function(d, i) {return 20*i;})
     .attr("width", function(d) { return 20; })
     .attr("fill", function(d) { return d; });
-
-// g.append("text")
-//  .attr("class", "caption")
-//  .attr("x", xScale.range()[0])
-//  .attr("y", -6)
-//  .attr("fill", "#000")
-//  .attr("text-anchor", "start")
-//  .attr("font-weight", "bold")
-//  .text("Unemployment rate");
 
 axis.call(d3.axisBottom(d3.scaleLinear().domain([0, 140]).range([20, 160]))
        .tickSize(13)
@@ -66,13 +52,23 @@ d3.queue()
     .defer(d3.csv, "data/coffee_per_zip.csv", function(d) { coffeeStats.set(d.zip, d); })
     .await(ready);
 
-function ready(error, map) {
+function ready(error, zipJson) {
+    if (error) throw error;
     var storeType = d3.select('input[name="storetype"]:checked').attr("value"),
         proportion = d3.select('#proportion').property("checked"),
         fixed = d3.select("#fixscale").property("checked");
 
-    if (error) throw error;
-    map.features.forEach(function(feat) {
+    var transform = d3.geoTransform({point: projectPoint}),
+        path = d3.geoPath(transform);
+
+    // Use Leaflet to implement a D3 geometric transformation.
+    function projectPoint(x, y) {
+        var point = map.latLngToLayerPoint(new L.LatLng(y, x));
+        this.stream.point(point.x, point.y);
+    }
+
+
+    zipJson.features.forEach(function(feat) {
         feat.stats = coffeeStats.get(feat.properties.ZIP) || {"zip": feat.properties.ZIP,
                                                               "dunkin": 0,
                                                               "other": 0,
@@ -84,17 +80,14 @@ function ready(error, map) {
                                                               "total_prop": 1.0,
                                                               "area": 1};
     });
-    mapSvg.append("g")
-        .attr("id", "zoomgroup")
-        .append("g")
-        .attr("transform", "translate(-150) scale(1.1)")
-        .attr("class", "zips")
-        .selectAll("path")
-        .data(map.features)
+
+    var allPaths = mapG.selectAll("path")
+        .data(zipJson.features)
         .enter().append("path")
-        .attr("class", function (d) {return "zip" + d.properties.ZIP})
+        .attr("class", function (d) {return "zip" + d.properties.ZIP; })
         .attr("fill", "#fff")
         .attr("d", path)
+            .style("opacity", 0.75)
   	    .on("mouseover",mouseover)
 	      .on("mouseout",mouseout);
 
@@ -112,14 +105,6 @@ function ready(error, map) {
         fixed = this.checked;
         updateFill();
     });
-
-    mapSvg.call(d3.zoom()
-             .scaleExtent([1/2, 10])
-             .on("zoom", zoomed));
-
-    function zoomed() {
-        mapSvg.select("#zoomgroup").attr("transform", d3.event.transform);
-    }
 
     var arc = circleGroup.selectAll(".arc")
             .data(pie([{'name': 'Starbucks', 'number': 1, 'total': 3},
@@ -190,7 +175,7 @@ function ready(error, map) {
     }
 
     function mouseover(d){
-        d3.selectAll("." + d3.select(this).attr("class")).style("stroke", "#aaa").style("stroke-width", "2px");
+        d3.selectAll("." + d3.select(this).attr("class")).style("stroke", "#fff").style("stroke-width", "3px");
 	      var pieStats = [{'name': 'Starbucks', 'number': d.stats['starbucks'], 'total': d.stats.total},
                         {'name': 'Dunkin\' Donuts', 'number': d.stats['dunkin'], 'total': d.stats.total},
                         {'name': 'Other', 'number': d.stats['other'], 'total': d.stats.total}];
@@ -260,7 +245,7 @@ function ready(error, map) {
                 .transition()
                 .duration(500)
                 .attr("fill", function(d) { return color(xPropScale(d.stats[storeType + "_prop"] || 0)); });
-            mapSvg.select(".zips").selectAll("path")
+            mapSvg.selectAll("path")
                 .select("title")
                 .text(function(d) { return d.stats[storeType + "_prop"] || 0; });
         } else {
@@ -284,12 +269,30 @@ function ready(error, map) {
                 .transition()
                 .duration(500)
                 .attr("fill", function(d) { return color(xLogScale(Math.floor(d.stats[storeType] / d.stats.area) || 0)); });
-            mapSvg.select(".zips").selectAll("path")
+            mapSvg.selectAll("path")
                 .select("title")
                 .text(function(d) { return d.stats[storeType] / d.stats.area || 0; });
         }
 
     }
+
+    function reset() {
+        var bounds = path.bounds(zipJson),
+            topLeft = bounds[0],
+            bottomRight = bounds[1];
+
+        mapSvg.attr("width", bottomRight[0] - topLeft[0])
+            .attr("height", bottomRight[1] - topLeft[1])
+            .style("left", topLeft[0] + "px")
+            .style("top", topLeft[1] + "px");
+
+        mapG.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+
+        allPaths.attr("d", path);
+    }
+
+    map.on("viewreset", reset);
+    reset();
     updateFill();
 }
 
