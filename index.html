@@ -9,19 +9,21 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.5/leaflet.js"></script>
     <body>
         <div id="settings">
+
+                <p class="info">Hover over a zip code to see a pie chart of coffee shops in that area. The size of the pie scales with the number of shops in the zip code.</p>
             <h1>Coffee shop type</h1>
             <div class="settingsgroup">
                 <div class="radio">
-                    <label><input type="radio" class="storetype" name="storetype" value="total" checked="checked">All</label>
+                    <label><input type="radio" class="storetype" name="storetype" value="total" checked="checked">All shops</label>
                 </div>
-                <div class="radio">
-                    <label><input type="radio" class="storetype" name="storetype" value="starbucks">Starbucks</label>
+                <div class="radio storesubtype">
+                    <label><input type="radio" class="storetype" name="storetype" value="starbucks">&nbsp;&nbsp;&nbsp;Starbucks</label>
                 </div>
-                <div class="radio">
-                    <label><input type="radio" class="storetype" name="storetype" value="dunkin">Dunkin' Donuts</label>
+                <div class="radio storesubtype">
+                    <label><input type="radio" class="storetype" name="storetype" value="dunkin">&nbsp;&nbsp;&nbsp;Dunkin' Donuts</label>
                 </div>
-                <div class="radio">
-                    <label><input type="radio" class="storetype" name="storetype" value="other">Other</label>
+                <div class="radio storesubtype">
+                    <label><input type="radio" class="storetype" name="storetype" value="other">&nbsp;&nbsp;&nbsp;Other</label>
                 </div>
                 <p class="info">Map all coffee shops by zip code, or map "Starbucks", "Dunkin' Donuts", or "other" coffee shops.</p>
             </div>
@@ -49,10 +51,10 @@
                 </label>
                 <div class="switchright">Fixed</div>
                 <!-- <label><input id="fixscale" type="checkbox" checked>Fix scale</label> -->
-                <p class="info">Choose "fixed" to keep the color scale constant when switching between shop type, and "free" to allow the scale to adjust for each shop type.</p>
+                <p class="info">Choose "fixed" to keep the scale's numeric range constant when switching between shop type, and "free" to allow the scale to adjust for each shop type.</p>
             </div>
+                <p class="info">Data on coffee shop location is aggregated from <a href="https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/xx67-kt59">New York City Restaurant Inspection Results</a></p>
 
-                <p class="info">Hover over a zip code to see a pie chart of coffee shops in that area. The size of the pie scales with the number of shops in zip code</p>
         </div>
         <p id="map"></p>
         <div class="mouseover">

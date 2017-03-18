@@ -22,7 +22,7 @@ var color = d3.scaleThreshold()
         .domain(d3.range(0,8))
         .range(d3.schemeBlues[9]);
 
-var pieColor = d3.scaleOrdinal(["#00592D", "#D81860", "#BBBBBB"]);
+var pieColor = d3.scaleOrdinal(["#00592D", "#F21F88", "#b2491E"]);
 
 var pie = d3.pie()
         .sort(null)
@@ -250,6 +250,7 @@ function ready(error, zipJson) {
                 .select("title")
                 .text(function(d) { return d.stats[storeType + "_prop"] || 0; });
         } else {
+            // per mi²
             d3.select("#scaletitle").text("Density");
             if (fixed) {
                 xLogScale.domain([2, 100]);
