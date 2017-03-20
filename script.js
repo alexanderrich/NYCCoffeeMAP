@@ -118,7 +118,7 @@ function ready(error, zipJson) {
               .outerRadius(10)
               .innerRadius(0))
         .each(function (d) {this._current = d; })
-        .attr("fill", function (d) {return pieColor(d.data.name); });
+        .style("fill", function (d) {return pieColor(d.data.name); });
 
     var textGroup = mouseOverGraph.append("g")
         .attr("transform", "translate(4, 20)");
